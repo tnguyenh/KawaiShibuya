@@ -262,7 +262,7 @@ species traffic_signal{
 	float light_z <- 5.5#m;
 	float light_x <- 3.5#m;
 	float t_x <- 1.4#m;
-	float t_z <- 3.5#m;
+	float t_z <- 3.8#m;
 	float heading;
 
 	
@@ -273,26 +273,50 @@ species traffic_signal{
 	// draws the pedestrian traffic light
 	action draw_box(string side, float hdg){
 		int s<- side="left"?1:-1;
-		draw square(0.04#m) rotated_by(-90,{0,1,0}) depth: t_x at: location+{0,0,t_z} rotate: hdg+s*90 color: #grey;
-		draw rectangle(0.3,0.15) depth: 0.6 at: location+({0,s*t_x,t_z-0.65} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;
-		draw square(0.04) depth: 0.05 at: location+({0,s*(t_x-0.02),t_z-0.05} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;		
+		draw square(0.06#m) rotated_by(-90,{0,1,0}) depth: t_x at: location+{0,0,t_z} rotate: hdg+s*90 color: #grey;
+		draw rectangle(0.6,0.15) depth: 1.2 at: location+({0,s*t_x,t_z-1.27} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;
+		draw square(0.06) depth: 0.05 at: location+({0,s*(t_x-0.03),t_z-0.08} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;		
 		loop i over: [-1,1]{
-			draw rectangle(0.05,0.02) depth: 0.2*world.percent_time_remaining 
-				at: location+({0.07,s*t_x+i*0.07,t_z-(world.schedule_step=1?1:2)*0.31} rotated_by (hdg::{0,0,1})) 
-				rotate: heading_l+90 color: (world.schedule_step=1)?#green:#red;
+			draw rectangle(0.12,0.02) depth: 0.4*world.percent_time_remaining 
+				at: location+({0.07,s*t_x+i*0.16,t_z-(world.schedule_step=1?1:2)*0.61} rotated_by (hdg::{0,0,1})) 
+				rotate: hdg+90 color: (world.schedule_step=1)?#green:#red;
 		}	
 		if world.schedule_step = 1{
-			draw triangle(0.15,0.2) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.55} rotated_by (hdg::{0,0,1})) 
+			draw triangle(0.3,0.4) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-1.05} rotated_by (hdg::{0,0,1})) 
 				rotate: hdg+90 color: #green;
-			draw circle(0.05) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.45} rotated_by (hdg::{0,0,1})) 
+			draw circle(0.1) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.8} rotated_by (hdg::{0,0,1})) 
 				rotate: hdg+90 color: #green;	
 		}else{
-			draw triangle(0.15,0.2) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.25} rotated_by (hdg::{0,0,1})) 
+			draw triangle(0.3,0.4) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.5} rotated_by (hdg::{0,0,1})) 
 				rotate: hdg+90 color: #red;
-			draw circle(0.05) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.15} rotated_by (hdg::{0,0,1})) 
+			draw circle(0.1) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.25} rotated_by (hdg::{0,0,1})) 
 				rotate: hdg+90 color: #red;
 		}	
 	}
+	
+	//
+//	action draw_box(string side, float hdg){
+//		int s<- side="left"?1:-1;
+//		draw square(0.04#m) rotated_by(-90,{0,1,0}) depth: t_x at: location+{0,0,t_z} rotate: hdg+s*90 color: #grey;
+//		draw rectangle(0.3,0.15) depth: 0.6 at: location+({0,s*t_x,t_z-0.65} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;
+//		draw square(0.04) depth: 0.05 at: location+({0,s*(t_x-0.02),t_z-0.05} rotated_by (hdg::{0,0,1})) rotate: hdg+s*90 color: #grey;		
+//		loop i over: [-1,1]{
+//			draw rectangle(0.05,0.02) depth: 0.2*world.percent_time_remaining 
+//				at: location+({0.07,s*t_x+i*0.07,t_z-(world.schedule_step=1?1:2)*0.31} rotated_by (hdg::{0,0,1})) 
+//				rotate: heading_l+90 color: (world.schedule_step=1)?#green:#red;
+//		}	
+//		if world.schedule_step = 1{
+//			draw triangle(0.15,0.2) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.55} rotated_by (hdg::{0,0,1})) 
+//				rotate: hdg+90 color: #green;
+//			draw circle(0.05) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.45} rotated_by (hdg::{0,0,1})) 
+//				rotate: hdg+90 color: #green;	
+//		}else{
+//			draw triangle(0.15,0.2) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.25} rotated_by (hdg::{0,0,1})) 
+//				rotate: hdg+90 color: #red;
+//			draw circle(0.05) rotated_by(-90,{1,0,0}) at: location+({0.08,s*t_x,t_z-0.15} rotated_by (hdg::{0,0,1})) 
+//				rotate: hdg+90 color: #red;
+//		}	
+//	}
 	
 	aspect default{
 		// draw the pole
@@ -321,10 +345,11 @@ species traffic_signal{
 			draw sphere(0.3#m) at: location+({light_x+0.9,-0.25,light_z-0.3} rotated_by (heading::{0,0,1}))
 				color: current_color="red"?#red:rgb(100,100,100);			
 		}	
-		//draw left crossing signal
+		//draw left pedestrian crossing signal
 		if crosswalk_left > 0{
 			do draw_box("left", heading_l);
 		}	
+		//draw right pedestrian crossing signal
 		if crosswalk_right > 0{
 			do draw_box("right", heading_r);
 		}
