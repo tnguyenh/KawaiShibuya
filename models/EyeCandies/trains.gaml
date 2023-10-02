@@ -2,15 +2,18 @@
 * Name: EyeCandies
 *  
 * Author: Tri Nguyen-Huu, Patrick Taillandier
-* Includes several species used for trains as eye candies
 * 
-* Species:
+* Includes several species used for trains as eye candies in the Shibuya Crossing model.
+* 
+* Trains follow a path using the driving skill. They consist of a locomotive and several carriages. The locomotive use
+* the driving skill, while carriage speed is synchronized to their locomotive.
+* 
+* Contains the following species:
 * - rail: railroad segments
 * - rail_wp: railroad waypoints or intersections
 * - train
 * - carriage
 * - rolling_stock: generic species for train and carriage, used for the train 3d models
-*
 *
 */
 

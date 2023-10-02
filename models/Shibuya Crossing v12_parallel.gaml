@@ -17,7 +17,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 200;
+	int nb_people <- 2000;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
@@ -452,6 +452,7 @@ species people skills: [pedestrian] control: fsm parallel: true{
 	bool for_debug <- false;
 	string fade_status <- "none";
 	float fading <- 1.0;
+	string retry <- "none";
 
 	reflex fade_away when: fade_status="fade_away"{
 		fading <- fading - 0.01;
@@ -521,98 +522,173 @@ species people skills: [pedestrian] control: fsm parallel: true{
 	}
 	
 	state go_to_grid_before_final_destination{
+		bool do_transition <- false;
+		transition to: go_to_grid_before_final_destination when: retry = "go_to_grid_before_final_destination";
 		enter{
-			speed <- normal_speed;		
-			dest <- nodes closest_to self;
+			try{
+				speed <- normal_speed;		
+				dest <- nodes closest_to self;
+				retry <- "none";
+			}catch{
+				retry <- "go_to_grid_before_final_destination";
+			}
+			
 		}
-		do walk_to target: dest;
-		if  norm(location - dest) < precision{
-			location <- dest;
+		try{
+			do walk_to target: dest;
+			if  norm(location - dest) < precision{
+				location <- dest;
+			}
+			do_transition <- norm(location - dest) < precision;
+		}catch{
+			retry <- "go_to_grid_before_final_destination";
 		}
-		transition to: go_to_final_destination when: norm(location - dest) < precision;
+		transition to: go_to_final_destination when: do_transition ;
 	}
 	
 	state go_to_final_destination{
+		bool do_transition <- false;
+		transition to: go_to_final_destination when: retry = "go_to_final_destination";	
 		enter{
-			dest <- final_dest;
-			dest <- nodes closest_to dest;
-			tracking <+ location;
-			if norm(location - dest)>= precision{	
-				do compute_virtual_path pedestrian_graph:network target: dest;
+			try{
+				dest <- final_dest;
+				dest <- nodes closest_to dest;
+				tracking <+ location;
+				if norm(location - dest)>= precision{	
+					do compute_virtual_path pedestrian_graph:network target: dest;
+				}
+				retry <- "none";
+			}catch{
+				retry <- "go_to_final_destination";
 			}
 		}
-		if norm(location - dest)>= precision{	
-			do walk;
-		}
-		transition to: find_new_destination when: norm(location - dest) < precision;
+		try{
+			if norm(location - dest)>= precision{	
+				do walk;
+			}
+			do_transition <- norm(location - dest) < precision;
+		}catch{
+			retry <- "go_to_final_destination";
+		}	
+		transition to: find_new_destination when: do_transition;
 	}
 	
 		state go_to_grid_before_crosswalk{
+		bool do_transition <- false;
+		transition to: go_to_grid_before_crosswalk when: retry = "go_to_grid_before_crosswalk";	
 		enter{
-			speed <- normal_speed;
-			dest <- nodes closest_to self;
-			tracking <+ location;
+			try{
+				speed <- normal_speed;
+				dest <- nodes closest_to self;
+				tracking <+ location;
+				retry <- "none";
+			}catch{
+				retry <- "go_to_grid_before_crosswalk";	
+			}
+			
 		}
-		do walk_to target: dest;
-		last_state <- "go_to_final_destination";
-		if  norm(location - dest) < precision{
-			location <- dest;
+		try{
+			do walk_to target: dest;
+			last_state <- "go_to_final_destination";
+			if  norm(location - dest) < precision{
+				location <- dest;
+			}
+			do_transition <- norm(location - dest) < precision;
+		}catch{
+			retry <- "go_to_grid_before_crosswalk";	
 		}
-		transition to: go_to_crosswalk when: norm(location - dest) < precision ;
+		
+		transition to: go_to_crosswalk when: do_transition;
 	}
 	
 	state go_to_crosswalk{
+		bool do_transition <- false;
+		transition to: go_to_crosswalk when: retry = "go_to_crosswalk";	
 		enter{
-			current_waiting_area <- 
-				first(current_area.waiting_areas where (each.opposite.my_walking_area = final_area));
-			if current_waiting_area = nil{
-				current_waiting_area <- one_of(current_area.waiting_areas);
-			}				
-			dest <- any_location_in(current_waiting_area);
-			dest <- nodes closest_to dest;
-			tracking <+ location;
+			try{
+				current_waiting_area <- 
+					first(current_area.waiting_areas where (each.opposite.my_walking_area = final_area));
+				if current_waiting_area = nil{
+					current_waiting_area <- one_of(current_area.waiting_areas);
+				}				
+				dest <- any_location_in(current_waiting_area);
+				dest <- nodes closest_to dest;
+				tracking <+ location;
+				if norm(location - dest)>= precision{	
+					do compute_virtual_path pedestrian_graph:network target: dest;
+				}
+				retry <- "none";
+			}catch{
+				retry <- "go_to_crosswalk";	
+			}
+		}
+		try{
 			if norm(location - dest)>= precision{	
-				do compute_virtual_path pedestrian_graph:network target: dest;
-			}			
-		}
-		if norm(location - dest)>= precision{	
-			do walk;
-		}
-		last_state <- "go_to_crosswalk";
-		transition to: waiting_to_cross when: (norm(location - dest) < precision+2*shoulder_length);
+				do walk;
+			}
+			last_state <- "go_to_crosswalk";
+			do_transition <- (norm(location - dest) < precision+2*shoulder_length);
+		}catch{
+			retry <- "go_to_crosswalk";	
+		}	
+		transition to: waiting_to_cross when: do_transition;
 	}
 	
 	state waiting_to_cross{
+		bool do_transition <- false;
+		transition to: waiting_to_cross when: retry = "waiting_to_cross";	
 		enter{
-			dest <- first(point(intersection(polyline(current_area.shape.points),polyline([location, location+current_waiting_area.direction]))));
-			if dest = nil{
-				dest <- any_location_in(current_waiting_area);
+			try{
+				dest <- first(point(intersection(polyline(current_area.shape.points),polyline([location, location+current_waiting_area.direction]))));
+				if dest = nil{
+					dest <- any_location_in(current_waiting_area);
+				}
+				tracking <+ location;
+				retry <- "none";
+			}catch{
+				
 			}
-			tracking <+ location;
+
 		}	
-		do walk_to target: dest;
-		last_state <- "waiting_to_cross";
-		transition to: crossing when: can_cross and (norm(location - dest) < 2);
+		try{
+			do walk_to target: dest;
+			last_state <- "waiting_to_cross";
+			do_transition <- can_cross and (norm(location - dest) < 2);
+		}catch{
+			retry <- "waiting_to_cross";	
+		}
+		transition to: crossing when: do_transition;
 	}
 	
 	state crossing{
+		bool other_side_reached <- false;
+		transition to: crossing when: retry = "crossing";	
 		enter{
-			geometry crossing_target <- intersection(current_waiting_area.opposite.shape,polyline([wait_location-current_waiting_area.direction,wait_location+current_waiting_area.direction]));
-			if crossing_target != nil{
-				dest <- any_location_in(crossing_target);
-			}else{
-				dest <- any_location_in(current_waiting_area.opposite);
+			try{
+				geometry crossing_target <- intersection(current_waiting_area.opposite.shape,polyline([wait_location-current_waiting_area.direction,wait_location+current_waiting_area.direction]));
+				if crossing_target != nil{
+					dest <- any_location_in(crossing_target);
+				}else{
+					dest <- any_location_in(current_waiting_area.opposite);
+				}
+				tracking <+ location;
+				current_area <- walking_area closest_to current_waiting_area.opposite;
+				retry <- "none";
+			}catch{
+				retry <- "crossing";
 			}
-			tracking <+ location;
-			current_area <- walking_area closest_to current_waiting_area.opposite;
 		}
-		if !can_cross{// boost to finish crossing before green light
+		try{
+			if !can_cross{// boost to finish crossing before green light
 			speed <- max(1,norm(dest-location)/(1#s+time_to_clear_crossing)) * normal_speed;
 		}
-		do walk_to target: dest;
-		bool other_side_reached <- self.location distance_to current_area < 1#m;
-		//transition to: go_to_crosswalk when: other_side_reached and (current_area != final_area);
-		last_state <- "crossing";
+			do walk_to target: dest;
+			other_side_reached <- self.location distance_to current_area < 1#m;
+			last_state <- "crossing";
+		}catch{
+			retry <- "crossing";
+		}
+
 		transition to: go_to_grid_before_crosswalk when: other_side_reached and (current_area != final_area);
 		transition to: go_to_grid_before_final_destination when: other_side_reached and (current_area = final_area);
 	}

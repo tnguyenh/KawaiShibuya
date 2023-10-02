@@ -2,7 +2,8 @@
 * Name: EyeCandies
 * 
 * Author: Tri Nguyen-Huu, Patrick Taillandier
-* Includes several species used as eye candies:
+* 
+* Props for the Shibuya Crossing model. Includes several species used as eye candies:
 * - buildings
 * - fake buildings (to hide cars and pedestrian under bridges)
 * - trees
