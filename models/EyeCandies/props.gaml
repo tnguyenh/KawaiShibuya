@@ -55,8 +55,11 @@ species building {
 	
 	aspect default {
 		if !invisible{
-			draw shape color: #gray depth: height;
+		//	draw shape color: #yellow depth: height;
 		}	
+		if int(self)=0{
+			draw obj_file("../includes/obj/ShibuyaBuildings.obj")  at: location+{73,-2,63} size: 320  color: #green rotate:-90::{1,0,0};	
+		}
 	}
 }
 
@@ -76,8 +79,9 @@ species tree{
 	float trunk_radius;
 	
 	aspect default{
-		draw circle(2*trunk_radius) depth: height color: #brown;
-		draw sphere(2*radius) at: location+{0,0,height} color: #green;
+	//	draw circle(2*trunk_radius) depth: height color: #brown;
+	//	draw sphere(2*radius) at: location+{0,0,height} color: #green;
+		draw obj_file("../includes/obj/ShibuyaTree_01.obj")  at: location+{0,0,5} size: 10 color: #green rotate:-90::{1,0,0} ;	
 	}
 }
 

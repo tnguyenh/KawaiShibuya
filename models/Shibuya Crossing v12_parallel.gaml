@@ -17,15 +17,21 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 2000;
+	int nb_people <- 800;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
 	float factor <- 1.0;
 	float mesh_size <- 2.0;
 	
+	bool show_fps <- true;
+	float mtime <- machine_time;
+	
+	
+	
 	shape_file bounds <- shape_file("../includes/Shibuya.shp");
-	image_file photo <- (image_file(("../includes/Shibuya.png")));
+//	image_file photo <- (image_file(("../includes/Shibuya.png")));
+	image_file photo <- (image_file(("../includes/Ground.jpg")));
 
 	shape_file crosswalk_shape_file <- shape_file("../includes/crosswalk.shp");
 	shape_file walking_area_shape_file <- shape_file("../includes/walking area.shp");
@@ -242,6 +248,15 @@ global {
 				fading <- 0.0;
 			}
 		}
+	}
+	
+	
+	reflex compute_fps when: show_fps and mod(cycle,100)=0 and cycle > 100{
+		float newmtime <- machine_time;
+		if cycle > 0{
+			write ""+round(100000/(newmtime-mtime)*10)/10+" fps.";
+		}
+		mtime <- newmtime;
 	}
 	
 	
@@ -702,13 +717,22 @@ species people skills: [pedestrian] control: fsm parallel: true{
 		draw square(shoulder_length/2 ) at: location+{0,0,0.1} color: color;
 	}
 	
+	reflex ess{
+		write "fd";
+		pair truc <- rotation_composition([-90.0::{1,0,0},1.0::{1,0,0}]);
+		write truc;
+	}
+	
 	aspect 3d {		
-		draw pyramid(scale*shoulder_length/2) color: rgb(color,fading);
-		draw sphere(scale*shoulder_length/4) at: location + {0,0,scale*shoulder_length/2} color: rgb(#black,fading);
-		draw sphere(scale*shoulder_length*7/32) at: location + ({scale*shoulder_length/16,0,0} rotated_by (heading::{0,0,1}))+ {0,0,scale*shoulder_length*15/32} color: rgb(191,181,164,fading);	
-		if for_debug{
-			draw polyline(waypoints) width: 3 color: color;
-		}
+//		draw pyramid(scale*shoulder_length/2) color: rgb(color,fading);
+//		draw sphere(scale*shoulder_length/4) at: location + {0,0,scale*shoulder_length/2} color: rgb(#black,fading);
+//		draw sphere(scale*shoulder_length*7/32) at: location + ({scale*shoulder_length/16,0,0} rotated_by (heading::{0,0,1}))+ {0,0,scale*shoulder_length*15/32} color: rgb(191,181,164,fading);	
+//		if for_debug{
+//			draw polyline(waypoints) width: 3 color: color;
+//		}
+
+		draw obj_file("../includes/obj/ShibuyaCharacter_01.obj","../includes/obj/ShibuyaCharacter_01.mtl")   at: location+{0,0,0.8} size: 1.5  color: #green 
+			rotate: rotation_composition([-90::{1,0,0},1::{0,0,1}]);	
 	}
 	
 		aspect debug {		

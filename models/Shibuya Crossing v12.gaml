@@ -17,12 +17,15 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 200;
+	int nb_people <- 600;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
 	float factor <- 1.0;
 	float mesh_size <- 2.0;
+	
+	bool show_fps <- true;
+	float mtime <- machine_time;
 	
 	shape_file bounds <- shape_file("../includes/Shibuya.shp");
 	image_file photo <- (image_file(("../includes/Shibuya.png")));
@@ -244,6 +247,13 @@ global {
 		}
 	}
 	
+	reflex compute_fps when: show_fps and mod(cycle,100)=0 and cycle > 100{
+		float newmtime <- machine_time;
+		if cycle > 0{
+			write ""+round(100000/(newmtime-mtime)*10)/10+" fps.";
+		}
+		mtime <- newmtime;
+	}
 	
 	reflex main_scheduler{
 
@@ -434,7 +444,7 @@ species waiting_area{
 
 
 
-species people skills: [pedestrian] control: fsm parallel: true{
+species people skills: [pedestrian] control: fsm parallel: false{
 	rgb color <- rnd_color(255);
 	float normal_speed <- gauss(5.2,1.5) #km/#h min: 2.5 #km/#h;
 	float scale <- rnd(0.9,1.1);
@@ -633,6 +643,7 @@ species people skills: [pedestrian] control: fsm parallel: true{
 		if for_debug{
 			draw polyline(waypoints) width: 3 color: color;
 		}
+		//draw obj_file("../includes/obj/ShibuyaCharacter_01.obj")  at: location+{0,0,1} size: 1.5  color: #green rotate:-90::{1,0,0};	
 	}
 	
 		aspect debug {		
