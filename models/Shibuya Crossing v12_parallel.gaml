@@ -717,11 +717,11 @@ species people skills: [pedestrian] control: fsm parallel: true{
 		draw square(shoulder_length/2 ) at: location+{0,0,0.1} color: color;
 	}
 	
-	reflex ess{
-		write "fd";
-		pair truc <- rotation_composition([-90.0::{1,0,0},1.0::{1,0,0}]);
-		write truc;
-	}
+//	reflex ess{
+//		write "fd";
+//		pair truc <- rotation_composition([-90.0::{1,0,0},1.0::{1,0,0}]);
+//		write truc;
+//	}
 	
 	aspect 3d {		
 //		draw pyramid(scale*shoulder_length/2) color: rgb(color,fading);
@@ -732,7 +732,7 @@ species people skills: [pedestrian] control: fsm parallel: true{
 //		}
 
 		draw obj_file("../includes/obj/ShibuyaCharacter_01.obj","../includes/obj/ShibuyaCharacter_01.mtl")   at: location+{0,0,0.8} size: 1.5  color: #green 
-			rotate: rotation_composition([-90::{1,0,0},1::{0,0,1}]);	
+			rotate: -90::{1,0,0};//rotation_composition([-90::{1,0,0},1::{0,0,1}]);	
 	}
 	
 		aspect debug {		
