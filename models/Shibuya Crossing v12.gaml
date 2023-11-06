@@ -17,7 +17,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 600;
+	int nb_people <- 60;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
@@ -726,7 +726,7 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 			species carriage;// transparency: 0.3;
 			species fake_building transparency: 0.9;			
 			species people aspect: 3d;
-			species car transparency: 0.3;
+			species car;// transparency: 0.3;
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;

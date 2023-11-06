@@ -724,15 +724,15 @@ species people skills: [pedestrian] control: fsm parallel: true{
 //	}
 	
 	aspect 3d {		
-//		draw pyramid(scale*shoulder_length/2) color: rgb(color,fading);
-//		draw sphere(scale*shoulder_length/4) at: location + {0,0,scale*shoulder_length/2} color: rgb(#black,fading);
-//		draw sphere(scale*shoulder_length*7/32) at: location + ({scale*shoulder_length/16,0,0} rotated_by (heading::{0,0,1}))+ {0,0,scale*shoulder_length*15/32} color: rgb(191,181,164,fading);	
-//		if for_debug{
-//			draw polyline(waypoints) width: 3 color: color;
-//		}
+		draw pyramid(scale*shoulder_length/2) color: rgb(color,fading);
+		draw sphere(scale*shoulder_length/4) at: location + {0,0,scale*shoulder_length/2} color: rgb(#black,fading);
+		draw sphere(scale*shoulder_length*7/32) at: location + ({scale*shoulder_length/16,0,0} rotated_by (heading::{0,0,1}))+ {0,0,scale*shoulder_length*15/32} color: rgb(191,181,164,fading);	
+		if for_debug{
+			draw polyline(waypoints) width: 3 color: color;
+		}
 
-		draw obj_file("../includes/obj/ShibuyaCharacter_01.obj","../includes/obj/ShibuyaCharacter_01.mtl")   at: location+{0,0,0.8} size: 1.5  color: #green 
-			rotate: -90::{1,0,0};//rotation_composition([-90::{1,0,0},1::{0,0,1}]);	
+//		draw obj_file("../includes/obj/ShibuyaCharacter_01.obj","../includes/obj/ShibuyaCharacter_01.mtl")   at: location+{0,0,0.8} size: 1.5  color: #green 
+//			rotate: -90::{1,0,0};//rotation_composition([-90::{1,0,0},1::{0,0,1}]);	
 	}
 	
 		aspect debug {		

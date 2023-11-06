@@ -114,11 +114,12 @@ species car skills: [driving] {
 	rgb color <- rnd_color(255);
 	rgb color2;
 	intersection target;
-	string type <- "car" among: ["car","truck"];
+	string type <- "car" among: ["car","truck","car2"];
 	
 	// randomly choose one type of car when spawned
 	init {
-		type <- rnd_choice(["car"::0.9,"truck"::0.1]);
+	//	type <- rnd_choice(["car"::0.9,"truck"::0.1]);
+		type <- rnd_choice(["car"::0.4,"car2"::0.5,"truck"::0.1]);
 		switch type {
 			match "car"{
 				vehicle_length <- 4.0 #m;
@@ -126,6 +127,9 @@ species car skills: [driving] {
 			match "truck"{
 				vehicle_length <- 8.0 #m;
 				color2 <- rnd_color(180,255);
+			}
+			match "car2"{
+				vehicle_length <- 4.0 #m;
 			}
 		}
 		max_speed <- global_max_speed;
@@ -166,6 +170,10 @@ species car skills: [driving] {
 		 			draw rectangle(1.65#m, 1.6#m ) depth: 0.4#m color: #black rotate: heading at: location+{0,0,0.9#m}+ ({-0.19#m,0,0} rotated_by (heading::{0,0,1}));	
 					draw (square(0.05#m)rotated_by(3::{1,0,0})) rotate: heading  color: color depth: 0.47#m at: location +  {0,0,0.87} + ({-0.4#m,0.825,0} rotated_by (heading::{0,0,1}));
 		 			draw (square(0.05#m)rotated_by(-3::{1,0,0})) rotate: heading  color: color depth: 0.47#m at: location +  {0,0,0.87} + ({-0.4#m,-0.825,0} rotated_by (heading::{0,0,1}));			
+				}
+				match "car2"{
+					draw obj_file("../includes/obj/CarOthers.obj")  at: location+{0,0,5} size: 2 color: #green rotate:-90::{1,0,0} ;	
+					draw obj_file("../includes/obj/CarBody.obj")  at: location+{0,0,5.33} size: 2 color: color rotate:-90::{1,0,0} ;	
 				}
 				match "truck"{
 					draw rectangle(7.8#m, 1.9#m ) depth: 0.2#m color: color rotate: heading at: location+{0,0,0.3#m};	
