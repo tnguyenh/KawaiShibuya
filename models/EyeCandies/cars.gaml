@@ -25,6 +25,10 @@ global{
 	float time_to_clear_crossing <- 0.0;
 	float percent_time_remaining <- (schedule_times[0] )/(schedule_times[5] + schedule_times[0] - schedule_times[1]);
 	float time_since_last_spawn <- 0.0;
+	
+	string carDirectory <- "../includes/obj/cars/";
+	list<string> carModels;
+	list<string> carModelsb;
 
 	// traffic lights cycle schedule (based on observations)
 	list<float> schedule_times <- [ 15#s, // pedestrian light to green
@@ -39,6 +43,14 @@ global{
 	graph road_network;	
 	
 	init{
+		file f <- folder(carDirectory);
+		list<string> carFiles <- f.contents where (copy_between(each,length(each)-5,length(each))="b.obj");
+		
+		loop cf over: carFiles{
+			carModelsb << carDirectory+cf;
+			carModels << carDirectory+replace(cf, "b.obj", ".obj");
+		}
+
 		//create the roads
 		create road from: road_shape_file with: [group::int(get("group"))];
 		ask road {
@@ -114,12 +126,13 @@ species car skills: [driving] {
 	rgb color <- rnd_color(255);
 	rgb color2;
 	intersection target;
-	string type <- "car" among: ["car","truck","car2"];
+	string type <- "car" among: ["car","truck"];
+	int version;
 	
 	// randomly choose one type of car when spawned
 	init {
-	//	type <- rnd_choice(["car"::0.9,"truck"::0.1]);
-		type <- rnd_choice(["car"::0.4,"car2"::0.5,"truck"::0.1]);
+		type <- rnd_choice(["car"::0.9,"truck"::0.1]);
+		version <- rnd(length(carModels)-1);
 		switch type {
 			match "car"{
 				vehicle_length <- 4.0 #m;
@@ -151,6 +164,39 @@ species car skills: [driving] {
 	}
 	
 	// cars 3d models (car and truck)
+	aspect kawai {
+		if (current_road != nil) {
+			switch type{
+				match "car"{
+					if acceleration > 0{
+						draw obj_file(carModels[version])  at: location+{0,0,0.7} size: 1.5 color: color  
+						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+					}else{
+						draw obj_file(carModelsb[version])  at: location+{0,0,0.7} size: 1.5 color: color  
+						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+					}				
+				}
+				match "truck"{
+					draw rectangle(7.8#m, 1.9#m ) depth: 0.2#m color: color rotate: heading at: location+{0,0,0.3#m};	
+					draw (circle(0.4#m)rotated_by(90::{1,0,0})) rotate: heading  color: #black depth: 0.3#m at: location + {0,0,0.4} + ({3#m,0.7,0} rotated_by (heading::{0,0,1}));
+					draw (circle(0.4#m)rotated_by(90::{1,0,0})) rotate: heading  color: #black depth: 0.28#m at: location +  {0,0,0.4} + ({-2#m,0.7,0} rotated_by (heading::{0,0,1}));
+					draw (circle(0.4#m)rotated_by(-90::{1,0,0})) rotate: heading  color: #black depth: 0.3#m at: location +  {0,0,0.4} + ({3#m,-0.7,0} rotated_by (heading::{0,0,1}));
+					draw (circle(0.4#m)rotated_by(-90::{1,0,0})) rotate: heading  color: #black depth: 0.28#m at: location +  {0,0,0.4} + ({-2#m,-0.7,0} rotated_by (heading::{0,0,1}));
+					draw rectangle(1.7#m, 1.9#m ) depth: 0.9#m color: color rotate: heading at: location+({3.05,0,0.3#m} rotated_by (heading::{0,0,1}));	
+					draw (triangle(0.6#m,0.66#m)rotated_by(-90::{1,0,0})) rotate: heading  color: #black depth: 1.8#m at: location +  {0,0,1.4} + ({3.57#m,0.9,0} rotated_by (heading::{0,0,1}));
+		 			draw (square(0.05#m)rotated_by(-24::{0,1,0})) rotate: heading  color: color depth: 0.72#m at: location +  {0,0,1.18} + ({3.87#m,0.9,0} rotated_by (heading::{0,0,1}));
+		 			draw (square(0.05#m)rotated_by(-24::{0,1,0})) rotate: heading  color: color depth: 0.72#m at: location +  {0,0,1.18} + ({3.87#m,-0.9,0} rotated_by (heading::{0,0,1}));
+		 			draw rectangle(1.4#m, 1.85#m ) depth: 0.05#m color: color rotate: heading at: location+{0,0,1.8#m}+ ({2.9#m,0,0} rotated_by (heading::{0,0,1}));	
+	 				draw rectangle(1#m, 1.8#m ) depth: 0.6#m color: #black rotate: heading at: location+{0,0,1.2}+ ({2.9#m,0,0} rotated_by (heading::{0,0,1}));	
+	 				draw rectangle(0.5#m, 1.85#m ) depth: 0.6#m color: color rotate: heading at: location+{0,0,1.2}+ ({2.45#m,0,0} rotated_by (heading::{0,0,1}));	
+	 				draw rectangle(6#m, 2#m ) depth: 2.2#m color: color2 rotate: heading at: location+{0,0,0.2}+ ({-0.95#m,0,0} rotated_by (heading::{0,0,1}));	
+				}
+			}
+  		}
+	}
+	
+	
+	
 	aspect default {
 		if (current_road != nil) {
 			switch type{
@@ -170,10 +216,6 @@ species car skills: [driving] {
 		 			draw rectangle(1.65#m, 1.6#m ) depth: 0.4#m color: #black rotate: heading at: location+{0,0,0.9#m}+ ({-0.19#m,0,0} rotated_by (heading::{0,0,1}));	
 					draw (square(0.05#m)rotated_by(3::{1,0,0})) rotate: heading  color: color depth: 0.47#m at: location +  {0,0,0.87} + ({-0.4#m,0.825,0} rotated_by (heading::{0,0,1}));
 		 			draw (square(0.05#m)rotated_by(-3::{1,0,0})) rotate: heading  color: color depth: 0.47#m at: location +  {0,0,0.87} + ({-0.4#m,-0.825,0} rotated_by (heading::{0,0,1}));			
-				}
-				match "car2"{
-					draw obj_file("../includes/obj/CarOthers.obj")  at: location+{0,0,5} size: 2 color: #green rotate:-90::{1,0,0} ;	
-					draw obj_file("../includes/obj/CarBody.obj")  at: location+{0,0,5.33} size: 2 color: color rotate:-90::{1,0,0} ;	
 				}
 				match "truck"{
 					draw rectangle(7.8#m, 1.9#m ) depth: 0.2#m color: color rotate: heading at: location+{0,0,0.3#m};	
