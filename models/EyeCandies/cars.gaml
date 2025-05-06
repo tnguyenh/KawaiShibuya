@@ -26,7 +26,6 @@ global{
 	float percent_time_remaining <- (schedule_times[0] )/(schedule_times[5] + schedule_times[0] - schedule_times[1]);
 	float time_since_last_spawn <- 0.0;
 	
-	string carDirectory <- "../includes/obj/cars/";
 	list<string> carModels;
 	list<string> carModelsb;
 
@@ -42,14 +41,59 @@ global{
 	shape_file road_shape_file <- shape_file("../includes/roads.shp");
 	graph road_network;	
 	
+//	map<rgb,int> palette <- [
+//		rgb(246, 229, 141)::1,
+//		rgb(249, 202, 36)::1,
+//		rgb(126, 214, 223)::1,
+//		rgb(34, 166, 179)::1,
+//		rgb(255, 190, 118)::1,
+//		rgb(240, 147, 43)::1,
+//		rgb(255, 121, 121)::1,
+//		rgb(235, 77, 75)::1,
+//		rgb(104, 109, 224)::1,
+//		rgb(72, 52, 212)::1,
+//		rgb(186, 220, 88)::1,
+//		rgb(106, 176, 76)::1,
+//		rgb(48, 51, 107)::1,
+//		rgb(19, 15, 64)::1,
+//		rgb(149, 175, 192)::1,
+//		rgb(83, 92, 104)::1
+//	];
+
+	map<rgb,int> palette <- [
+		rgb(249, 202, 36)::1,
+		rgb(240, 147, 43)::1,
+		rgb(235, 77, 75)::1,
+		rgb(106, 176, 76)::1,
+		rgb(126, 214, 223)::1,
+		rgb(224, 86, 253)::1,
+		rgb(104, 109, 224)::1,
+		rgb(48, 51, 107)::1,
+		rgb(34, 166, 179)::1,
+		rgb(190, 46, 221)::1,
+		rgb(72, 52, 212)::1,
+		rgb(26, 188, 156)::1,
+		rgb(46, 204, 113)::1,
+		rgb(52, 152, 219)::1,
+		rgb(41, 128, 185)::1,
+		rgb(241, 196, 15)::1,
+		rgb(230, 126, 34)::1,
+		rgb(231, 76, 60)::1,
+		rgb(236, 240, 241)::1,
+		rgb(243, 156, 18)::1,
+		rgb(211, 84, 0)::1,
+		rgb(192, 57, 43)::1,
+		rgb(113, 128, 147)::1,
+		rgb(245, 246, 250)::1,
+		rgb(232, 65, 24)::1,
+		rgb(39, 60, 117)::1,
+		rgb(76, 209, 55)::1,
+		rgb(235, 47, 6)::1,
+		rgb(30, 55, 153)::1
+	];
+	
+	
 	init{
-		file f <- folder(carDirectory);
-		list<string> carFiles <- f.contents where (copy_between(each,length(each)-5,length(each))="b.obj");
-		
-		loop cf over: carFiles{
-			carModelsb << carDirectory+cf;
-			carModels << carDirectory+replace(cf, "b.obj", ".obj");
-		}
 
 		//create the roads
 		create road from: road_shape_file with: [group::int(get("group"))];
@@ -123,11 +167,15 @@ species road skills: [road_skill]{
 
 
 species car skills: [driving] {
-	rgb color <- rnd_color(255);
+//	rgb color <- rnd_color(255);
+	rgb color <- rnd_choice(palette);
 	rgb color2;
 	intersection target;
 	string type <- "car" among: ["car","truck"];
 	int version;
+	obj_file carBody;
+	obj_file carOtherParts;
+	obj_file carOtherPartsBraking;
 	
 	// randomly choose one type of car when spawned
 	init {
@@ -135,14 +183,14 @@ species car skills: [driving] {
 		version <- rnd(length(carModels)-1);
 		switch type {
 			match "car"{
-				vehicle_length <- 4.0 #m;
+				vehicle_length <- 5 #m;
+				carBody <- obj_file("../includes/obj/CarBody.obj");
+				carOtherParts <- obj_file("../includes/obj/CarOthers.obj");
+				carOtherPartsBraking <- obj_file("../includes/obj/CarOthersBraking.obj");
 			}
 			match "truck"{
 				vehicle_length <- 8.0 #m;
 				color2 <- rnd_color(180,255);
-			}
-			match "car2"{
-				vehicle_length <- 4.0 #m;
 			}
 		}
 		max_speed <- global_max_speed;
@@ -168,13 +216,20 @@ species car skills: [driving] {
 		if (current_road != nil) {
 			switch type{
 				match "car"{
-					if acceleration > 0{
-						draw obj_file(carModels[version])  at: location+{0,0,0.7} size: 1.5 color: color  
-						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+//					if acceleration > 0{
+//						draw obj_file(carModels[version])  at: location+{0,0,0.7} size: 1.5  
+//						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+//					}else{
+//						draw obj_file(carModelsb[version])  at: location+{0,0,0.7} size: 1.5   
+//						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+//					}	
+					if acceleration > 0{	
+						draw carOtherParts  at: location+{0,0,0.93} size: 2  rotate: pair<float,point>(rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) );	
 					}else{
-						draw obj_file(carModelsb[version])  at: location+{0,0,0.7} size: 1.5 color: color  
-						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
-					}				
+						draw carOtherPartsBraking  at: location+{0,0,0.93} size: 2  rotate: pair<float,point>(rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) );						
+					}
+					draw carBody  at: location+{0,0,1.26} size: 2 color: color rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
+					draw rectangle(1.9#m,3.9#m) at: location+{0,0,0.01} color: rgb(50,50,50,0.3) rotate: heading+90::{0,0,1};
 				}
 				match "truck"{
 					draw rectangle(7.8#m, 1.9#m ) depth: 0.2#m color: color rotate: heading at: location+{0,0,0.3#m};	

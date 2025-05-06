@@ -13,6 +13,18 @@
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
-		<nature>msi.gama.application.gamaNature</nature>
+		<nature>gama.ui.application.gamaNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>external/Shibuya.png</name>
+			<type>1</type>
+			<location>C:/Users/Tri/Prout/Shibuya.png</location>
+		</link>
+		<link>
+			<name>external/copy of Shibuya.png</name>
+			<type>1</type>
+			<location>D:/Uu/Shibuya.png</location>
+		</link>
+	</linkedResources>
 </projectDescription>

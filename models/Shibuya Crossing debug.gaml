@@ -17,7 +17,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 200;
+	int nb_people <- 20;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
@@ -745,7 +745,7 @@ experiment "Parameter panel" virtual: true{
 experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 	float minimum_cycle_duration <- 0.001#s;
 	output  {
-		display map type: 3d axes: false background: #darkgray{
+		display map type: 3d axes: false background: #darkgray toolbar: false{
 			camera 'default' location: {98.4788,143.3489,64.7132} target: {98.6933,81.909,0.0};
 			image photo refresh: false transparency: 0 ;	
 

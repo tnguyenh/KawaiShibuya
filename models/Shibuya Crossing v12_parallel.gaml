@@ -17,7 +17,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 800;
+	int nb_people <- 10000;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
@@ -25,7 +25,7 @@ global {
 	float mesh_size <- 2.0;
 	
 	bool show_fps <- true;
-	float mtime <- machine_time;
+	float mtime <- gama.machine_time;
 	
 	
 	
@@ -41,33 +41,33 @@ global {
 	geometry shape <- envelope(bounds);
 	
 	
-	float P_shoulder_length <- 1.0 parameter: true category: "Pedestrian simulation";
-	float P_proba_detour <- 0.5 parameter: true category: "Pedestrian simulation";
-	bool P_avoid_other <- true parameter: true category: "Pedestrian simulation";
-	float P_obstacle_consideration_distance <- 3.0 parameter: true category: "Pedestrian simulation";
-	float P_pedestrian_consideration_distance <- 3.0 parameter: true category: "Pedestrian simulation";
-	float P_tolerance_target <- 0.1 parameter: true category: "Pedestrian simulation";
-	bool P_use_geometry_target <- true parameter: true category: "Pedestrian simulation";
+	float P_shoulder_length <- 1.0;
+	float P_proba_detour <- 0.5 ;
+	bool P_avoid_other <- true ;
+	float P_obstacle_consideration_distance <- 3.0 ;
+	float P_pedestrian_consideration_distance <- 3.0 ;
+	float P_tolerance_target <- 0.1 ;
+	bool P_use_geometry_target <- true ;
 	
 	
-	string P_model_type <- "simple" among: ["simple", "advanced"] parameter: true category: "Pedestrian simulation"; 
-	string pedestrian_path_init <- "grid" among: ["voronoi", "grid"] parameter: true category: "Pedestrian simulation"; 
+	string P_model_type <- "simple" among: ["simple", "advanced"] ; 
+	string pedestrian_path_init <- "grid" among: ["voronoi", "grid"] ; 
 	
-	float P_A_pedestrian_SFM_advanced parameter: true <- 0.0001 category: "SFM advanced" ;
-	float P_A_obstacles_SFM_advanced parameter: true <- 1.9 category: "SFM advanced" ;
-	float P_B_pedestrian_SFM_advanced parameter: true <- 0.1 category: "SFM advanced" ;
-	float P_B_obstacles_SFM_advanced parameter: true <- 1.0 category: "SFM advanced" ;
-	float P_relaxion_SFM_advanced  parameter: true <- 0.5 category: "SFM advanced" ;
-	float P_gama_SFM_advanced parameter: true <- 0.35 category: "SFM advanced" ;
-	float P_lambda_SFM_advanced <- 0.1 parameter: true category: "SFM advanced" ;
-	float P_minimal_distance_advanced <- 0.25 parameter: true category: "SFM advanced" ;
+	float P_A_pedestrian_SFM_advanced  <- 0.0001 ;
+	float P_A_obstacles_SFM_advanced  <- 1.9 ;
+	float P_B_pedestrian_SFM_advanced  <- 0.1 ;
+	float P_B_obstacles_SFM_advanced  <- 1.0 ;
+	float P_relaxion_SFM_advanced   <- 0.5 ;
+	float P_gama_SFM_advanced  <- 0.35 ;
+	float P_lambda_SFM_advanced <- 0.1  ;
+	float P_minimal_distance_advanced <- 0.25  ;
 	
-	float P_n_prime_SFM_simple parameter: true <- 3.0 category: "SFM simple" ;
-	float P_n_SFM_simple parameter: true <- 2.0 category: "SFM simple" ;
-	float P_lambda_SFM_simple <- 2.0 parameter: true category: "SFM simple" ;
-	float P_gama_SFM_simple parameter: true <- 0.35 category: "SFM simple" ;
-	float P_relaxion_SFM_simple parameter: true <- 0.54 category: "SFM simple" ;
-	float P_A_pedestrian_SFM_simple parameter: true <-4.5category: "SFM simple" ;
+	float P_n_prime_SFM_simple  <- 3.0 ;
+	float P_n_SFM_simple  <- 2.0 ;
+	float P_lambda_SFM_simple <- 2.0  ;
+	float P_gama_SFM_simple  <- 0.35 ;
+	float P_relaxion_SFM_simple  <- 0.54 ;
+	float P_A_pedestrian_SFM_simple  <-4.5;
 	graph network;
 	
 
@@ -252,7 +252,7 @@ global {
 	
 	
 	reflex compute_fps when: show_fps and mod(cycle,100)=0 and cycle > 100{
-		float newmtime <- machine_time;
+		float newmtime <- gama.machine_time;
 		if cycle > 0{
 			write ""+round(100000/(newmtime-mtime)*10)/10+" fps.";
 		}
@@ -795,10 +795,38 @@ species debug{
 
 
 experiment "Parameter panel" virtual: true{
-	parameter "Population" var: nb_people step: 10 min: 0 max: 2000;
+	parameter "Population" var: nb_people step: 10 min: 0 max: 100000;
 	parameter "Cycle duration (s)" var: step step: 0.05 min: 0.05 max: 10.0 unit: "#s";
 	
-	float car_spawning_interval <- 5#s parameter: true category: "Simulation";
+	parameter "P shoulder length" var: P_shoulder_length category: "Pedestrian simulation";
+	parameter "P proba detour" var: P_proba_detour category: "Pedestrian simulation";
+	parameter "P avoid other" var: P_avoid_other category: "Pedestrian simulation";
+	parameter "P obstacle_consideration_distance" var: P_obstacle_consideration_distance  category: "Pedestrian simulation";
+	parameter "P pedestrian consideration distance" var: P_pedestrian_consideration_distance  category: "Pedestrian simulation";
+	parameter "P tolerance target" var: P_tolerance_target  category: "Pedestrian simulation";
+	parameter "P use geometry target" var: P_use_geometry_target  category: "Pedestrian simulation";
+	
+	
+	parameter "P model type" var: P_model_type among: ["simple", "advanced"]  category: "Pedestrian simulation"; 
+	parameter "pedestrian path init" var: pedestrian_path_init among: ["voronoi", "grid"]  category: "Pedestrian simulation"; 
+	
+	parameter "P A pedestrian SFM advanced"  var: P_A_pedestrian_SFM_advanced category: "SFM advanced" ;
+	parameter "P A obstacles SFM advanced"  var: P_A_obstacles_SFM_advanced category: "SFM advanced" ;
+	parameter "P B_pedestrian_SFM_advanced"  var: P_B_pedestrian_SFM_advanced category: "SFM advanced" ;
+	parameter "P B_obstacles_SFM_advanced"  var: P_B_obstacles_SFM_advanced category: "SFM advanced" ;
+	parameter "P relaxion_SFM_advanced"  var: P_relaxion_SFM_advanced category: "SFM advanced" ;
+	parameter "P gama_SFM_advanced"  var: P_gama_SFM_advanced category: "SFM advanced" ;
+	parameter "P lambda_SFM_advanced" var: P_lambda_SFM_advanced  category: "SFM advanced" ;
+	parameter "P minimal_distance_advanced" var: P_minimal_distance_advanced  category: "SFM advanced" ;
+	
+	parameter "P n_prime_SFM_simple"  var: P_n_prime_SFM_simple category: "SFM simple" ;
+	parameter "P n_SFM_simple"  var: P_n_SFM_simple category: "SFM simple" ;
+	parameter "P lambda_SFM_simple" var: P_lambda_SFM_simple  category: "SFM simple" ;
+	parameter "P gama_SFM_simple"  var: P_gama_SFM_simple category: "SFM simple" ;
+	parameter "P relaxion_SFM_simple"  var: P_relaxion_SFM_simple category: "SFM simple" ;
+	parameter "P A_pedestrian_SFM_simple"  var: P_A_pedestrian_SFM_simple category: "SFM simple" ;
+	
+	parameter "car spawning interval" var: car_spawning_interval <- 5#s category: "Simulation";
 }
 
 
