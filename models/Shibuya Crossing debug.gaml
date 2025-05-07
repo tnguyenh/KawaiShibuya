@@ -17,7 +17,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 
-	int nb_people <- 20;
+	int nb_people <- 2000;
 	float step <- 0.25#s;
 	
 	float precision <- 0.2;
@@ -212,6 +212,29 @@ global {
 				heading_r <- towards({0,0},dir_r);	
 			}	
 		}
+		
+		create screen {
+			dimensions <- {6.05#m,1#m,20#m};
+			location <- {72.15,20.35, 7};
+			angle <- 10.0;
+		}
+		
+		create screen {
+			dimensions <- {7.7#m,1#m,20#m};
+			location <- {78.85,20.7, 7};
+			angle <- -2.5;
+		}
+		
+		create screen {
+			dimensions <- {6.4#m,1#m,20#m};
+			location <- {85.5,19.36, 7};
+			angle <- -22.0;
+		}
+		
+//			draw box(6.05#m,1#m,20#m) at: {} color: color rotate: 10;
+//		draw box() at: {78.85,20.7, 7} color: color rotate: -2.5;
+//		draw box(6.4#m,1#m,20#m) at: {85.5,19.36, 7} color: color rotate: -22;
+		
 	}
 	
 
@@ -757,6 +780,7 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
+			species screen transparency: 0.2;
 		}
 	}
 	
@@ -778,7 +802,7 @@ experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel"
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
-
+			species screen transparency: 0.3;
 		}
 	}
 	
@@ -805,6 +829,7 @@ experiment "First person view" type: gui  {
 		 	species tree transparency: 0.6;
 			species building transparency: 0.4;
 			species car transparency: 0.6;
+			species screen transparency: 0.3;
 		}
 	}
 }
@@ -823,6 +848,7 @@ experiment "Car view" type: gui  {
 			species tree transparency: 0.6;
 			species building transparency: 0.4;
 			species car transparency: 0.6;
+			species screen transparency: 0.3;
 		}
 	}
 }

@@ -85,5 +85,63 @@ species tree{
 	}
 }
 
+species screen{
+	point dimensions;
+	rgb color <- rgb(252,107,198);
+	float angle;
+	list<pair<int,list<rgb>>> sequence <-list( 
+		10::[#black],
+		50::[rgb(2,121,230),rgb(1,64,120)],
+		5::[rgb(255,255,255)],
+		5::[rgb(224,16,11)],
+		5::[rgb(255,255,255)],
+		5::[rgb(224,16,11)],
+		5::[rgb(255,255,255)],
+		5::[rgb(224,16,11)],
+		5::[rgb(255,255,255)],
+		20::[rgb(220,250,12)],
+		35::[rgb(220,250,12),rgb(20,250,12)],
+		10::[#black],
+		12::[rgb(14,55,248)],
+		7::[rgb(158,78,248)],
+		10::[rgb(14,55,248)],
+		20::[#black],
+		55::[#black,#orange],
+		5::[#white],
+		10::[#orange],
+		40::[rgb(12,50,152),rgb(15,64,193)],
+		5::[#black],
+		10::[#black,rgb(252,107,198)],
+		50::[rgb(252,107,198)]
+	);
+	int currentState <- 0;
+	int stepsToNextState <- sequence[currentState].key;
+	
+	reflex updateScreen{
+		if (stepsToNextState = 0){
+			currentState <- (currentState + 1) mod length(sequence);
+			stepsToNextState <- sequence[currentState].key;
+			if (length(sequence[currentState].value) = 1){
+				color <- sequence[currentState].value[0];
+			}
+		}else{
+			stepsToNextState <- stepsToNextState - 1;
+			if (length(sequence[currentState].value) = 2){
+				color <- blend(sequence[currentState].value[0],sequence[currentState].value[1],stepsToNextState/sequence[currentState].key);
+			}
+		}
+		
+	}
+	
+	aspect default{
+		draw box(dimensions) color: color rotate: angle;
+//		draw box(6.05#m,1#m,20#m) at: {72.15,20.35, 7} color: color rotate: 10;
+//		draw box(7.7#m,1#m,20#m) at: {78.85,20.7, 7} color: color rotate: -2.5;
+//		draw box(6.4#m,1#m,20#m) at: {85.5,19.36, 7} color: color rotate: -22;
+		
+	}
+	
+}
+
 
 
