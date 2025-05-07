@@ -3,6 +3,10 @@
 * 
 * Author: Tri Nguyen-Huu, Patrick Taillandier
 * 
+* Graphics design by 
+*
+*
+* 
 * This is a simulation of Shibuya Crossing (Tokyo, Japan).
 *
 *
@@ -16,9 +20,10 @@ import "EyeCandies/props.gaml"
 import "EyeCandies/cars.gaml"
 
 global {
-
-	int nb_people <- 200;
+	
+	int nb_people <- 10;
 	float step <- 0.25#s;
+	bool parallelize <- true;
 	
 	float precision <- 0.2;
 	float factor <- 1.0;
@@ -34,6 +39,75 @@ global {
 	shape_file walking_area_shape_file <- shape_file("../includes/walking area.shp");
 	shape_file traffic_signals_shape_file <- shape_file("../includes/traffic_signals.shp");
 
+	map<string,map<int,list>> cameraPaths <- [
+		"Overview" :: [
+			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}]
+			],
+		"From hotel" :: [
+			0 :: [{32.816,86.3686,71.9106}, {76.6664,59.7071,0.0}]
+		],
+		"From cafe" :: [
+			0 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
+		],
+		"Timelapse" :: [
+			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
+			1000::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}]
+		],
+		"Bird view" :: [
+			0::[{4.4063,54.6104,84.8243},{7.3889,54.6208,0.0}],
+			500::[{144.6128,57.1369,84.8243},{147.5954,57.1473,0.0}]
+		],
+		"Bird view (far)" :: [
+			0 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
+			500 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0]
+		],
+		"Walk to the edge" :: [
+			0 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
+			100 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,15.0},40],
+			170 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40]
+		],
+//		"Trailer" :: [
+//			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
+//			400::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}],
+//			401 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
+//			900 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0],
+//			901 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
+//			1000 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,15.0},40],
+//			1070 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
+//			1071 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
+//		]
+		"Trailer" :: [
+			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
+			100::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}],
+			101 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
+			225 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0],
+			226 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
+			251 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,0.0},40],
+			268 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
+			305 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
+			306 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
+		],
+		"Kubrick" :: [
+			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
+//			100::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0},30]
+			300::[{98.3439,181.9881,105.411},{98.6933,81.909,0.0},30.0]
+		]
+		
+	];
+	
+	list<string> dynamicCameraList <- ["Timelapse", "Bird view", "Bird view (far)", "Walk to the edge","Trailer","Kubrick"];
+	
+	string currentScenario <- "Kubrick";
+	map<int,list> currentCameraPath <- cameraPaths[currentScenario];
+
+//	point cameraPosition <- {98.4788,143.3489,64.7132};
+//	point cameraTarget <- {98.6933,81.909,0.0} ;
+//	float cameraLens <- 45.0;
+	point cameraPosition <- currentCameraPath[currentCameraPath.keys[0]][0];
+	point cameraTarget <- currentCameraPath[currentCameraPath.keys[0]][1];
+	float cameraLens <- length(currentCameraPath[currentCameraPath.keys[0]]) = 3 ? float(currentCameraPath[currentCameraPath.keys[0]][2]) : 45.0;
+	bool dynamicCamera <- currentScenario in dynamicCameraList;
+	
 	
 	geometry shape <- envelope(bounds);
 	
@@ -96,6 +170,30 @@ global {
 	list<geometry> voronoi_diagram;
 	geometry bounds_shape;
 	int target_pop <- nb_people;
+	
+	// update camera position along waypoints
+	reflex updateCamera{
+		int lastWaypoint <- last(currentCameraPath.keys);
+		if (cycle >= lastWaypoint){
+			cameraPosition <- currentCameraPath[lastWaypoint][0];
+			cameraTarget <- currentCameraPath[lastWaypoint][1];
+			cameraLens <- length(currentCameraPath[lastWaypoint]) = 3 ? float(currentCameraPath[lastWaypoint][2]) : 45.0;
+		} else {
+			// determine the previous waypoint and the next one for the camera movement
+			int previousWaypoint <- max(currentCameraPath.keys where (each <= cycle));
+			int nextWaypoint <- currentCameraPath.keys[index_of(currentCameraPath.keys, previousWaypoint)+1];
+			// compute the position and the orientation of the camera
+			cameraPosition <- point(currentCameraPath[previousWaypoint][0]) * (nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)
+				+ point(currentCameraPath[nextWaypoint][0]) * (cycle - previousWaypoint) / (nextWaypoint - previousWaypoint);
+			cameraTarget <- point(currentCameraPath[previousWaypoint][1]) * (nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)
+				+ point(currentCameraPath[nextWaypoint][1]) * (cycle - previousWaypoint) / (nextWaypoint - previousWaypoint);
+			// adjust the camera lens
+			float previousCameraLens <- length(currentCameraPath[previousWaypoint]) = 3 ? float(currentCameraPath[previousWaypoint][2]) : 45.0;
+			float nextCameraLens <- length(currentCameraPath[nextWaypoint]) = 3 ? float(currentCameraPath[nextWaypoint][2]) : 45.0;
+			cameraLens <- previousCameraLens * (nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)
+				+ nextCameraLens * (cycle - previousWaypoint) / (nextWaypoint - previousWaypoint);
+		}
+	}
 	
 	init {
 		gama.pref_opengl_z_factor <- 0.0;
@@ -212,6 +310,29 @@ global {
 				heading_r <- towards({0,0},dir_r);	
 			}	
 		}
+		
+		create screen {
+			dimensions <- {6.05#m,1#m,20#m};
+			location <- {72.15,20.35, 7};
+			angle <- 10.0;
+		}
+		
+		create screen {
+			dimensions <- {7.7#m,1#m,20#m};
+			location <- {78.85,20.7, 7};
+			angle <- -2.5;
+		}
+		
+		create screen {
+			dimensions <- {6.4#m,1#m,20#m};
+			location <- {85.5,19.36, 7};
+			angle <- -22.0;
+		}
+		
+//			draw box(6.05#m,1#m,20#m) at: {} color: color rotate: 10;
+//		draw box() at: {78.85,20.7, 7} color: color rotate: -2.5;
+//		draw box(6.4#m,1#m,20#m) at: {85.5,19.36, 7} color: color rotate: -22;
+		
 	}
 	
 
@@ -445,7 +566,7 @@ species waiting_area{
 
 
 
-species people skills: [pedestrian] control: fsm parallel: false{
+species people skills: [pedestrian] control: fsm parallel: parallelize{
 	rgb color <- rnd_color(255);
 	float normal_speed <- gauss(5.2,1.5) #km/#h min: 2.5 #km/#h;
 	float scale <- rnd(0.9,1.1);
@@ -704,10 +825,11 @@ species debug{
 
 
 experiment "Parameter panel" virtual: true{
-	parameter "Population" var: nb_people step: 10 min: 0 max: 2000;
-	parameter "Cycle duration (s)" var: step step: 0.05 min: 0.05 max: 10.0 unit: "#s";
+	parameter "Population" var: nb_people step: 10 min: 0 max: 5000 category: "Simulation";
+	parameter "Cycle duration (s)" var: step step: 0.05 min: 0.05 max: 10.0 unit: "#s" category: "Simulation";
+	category "Simulation"  expanded: true color: rgb(46, 204, 113);
 	
-	
+	parameter "Parallelize computation" var: parallelize category: "Pedestrian simulation";
 	parameter "P shoulder length" var: P_shoulder_length category: "Pedestrian simulation";
 	parameter "P proba detour" var: P_proba_detour category: "Pedestrian simulation";
 	parameter "P avoid other" var: P_avoid_other category: "Pedestrian simulation";
@@ -745,7 +867,7 @@ experiment "Parameter panel" virtual: true{
 experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 	float minimum_cycle_duration <- 0.001#s;
 	output  {
-		display map type: 3d axes: false background: #darkgray{
+		display map type: 3d axes: false background: #darkgray toolbar: false{
 			camera 'default' location: {98.4788,143.3489,64.7132} target: {98.6933,81.909,0.0};
 			image photo refresh: false transparency: 0 ;	
 
@@ -757,6 +879,7 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
+			species screen transparency: 0.2;
 		}
 	}
 	
@@ -766,8 +889,18 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel" {
 	float minimum_cycle_duration <- 0.001#s;
 	output synchronized: true {
-		display map type: 3d axes: false background: #darkgray{
-			camera 'default' location: {98.4788,143.3489,64.7132} target: {98.6933,81.909,0.0};
+		display map type: 3d axes: false background: #darkgray toolbar: true{
+//			camera 'default' location: {98.4788,143.3489,64.7132} target: {98.6933,81.909,0.0};
+//			camera 'default' location: {98.4788,143.3489,64.7132}*(1-cycle/120) + {89.6265,108.4783,47.5701} *cycle/120
+//			target:  {98.6933,81.909,0.0} * (1-cycle/120) + {89.7842,63.3143,0.0} * cycle/120;
+//			camera 'default' location:pos target: targ;
+			
+			// view from other side
+//			camera 'default' location:{0,143.3489,64.7132}*(1+cycle) target: {98.6933,81.909,0.0};
+			
+			camera 'default' location:cameraPosition target: cameraTarget dynamic: dynamicCamera lens: cameraLens;
+
+
 			image photo refresh: false transparency: 0 ;	
 
 			species train;// transparency: 0.03;
@@ -778,15 +911,14 @@ experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel"
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
-
+			species screen transparency: 0.3;
 		}
 	}
 	
-	reflex saveSnapshots when: (cycle>1) {
+	reflex saveSnapshots when: (cycle>10000) {
 		ask simulation{
-		save (snapshot("map")) to: "snapshots/img"+cycle+".png";
+			save (snapshot("map")) to: "snapshots/img"+cycle+".png";
 		}
-		
 	}
 }
 
@@ -805,6 +937,7 @@ experiment "First person view" type: gui  {
 		 	species tree transparency: 0.6;
 			species building transparency: 0.4;
 			species car transparency: 0.6;
+			species screen transparency: 0.3;
 		}
 	}
 }
@@ -823,6 +956,7 @@ experiment "Car view" type: gui  {
 			species tree transparency: 0.6;
 			species building transparency: 0.4;
 			species car transparency: 0.6;
+			species screen transparency: 0.3;
 		}
 	}
 }
