@@ -21,7 +21,7 @@ import "EyeCandies/cars.gaml"
 
 global {
 	
-	int nb_people <- 10;
+	int nb_people <- 2200;
 	float step <- 0.25#s;
 	bool parallelize <- true;
 	
@@ -49,6 +49,10 @@ global {
 		"From cafe" :: [
 			0 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
 		],
+		"From cafe (left to right)"::[
+			0 :: [{81.0254,22.4783,12}, {88.5952,42.4058,5.0}],
+			300 :: [{81.0254,22.4783,12}, {81.0567,42.6362,5.5}]
+		],
 		"Timelapse" :: [
 			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
 			1000::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}]
@@ -63,42 +67,44 @@ global {
 		],
 		"Walk to the edge" :: [
 			0 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
-			100 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,15.0},40],
+			100 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,0.0},40],
 			170 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40]
 		],
-//		"Trailer" :: [
-//			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
-//			400::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}],
-//			401 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
-//			900 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0],
-//			901 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
-//			1000 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,15.0},40],
-//			1070 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
-//			1071 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
-//		]
 		"Trailer" :: [
-			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
-			100::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}],
-			101 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
-			225 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0],
-			226 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
-			251 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,0.0},40],
-			268 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
-			305 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
-			306 :: [{80.2911,20.2295,15.7393}, {81.228,43.5573,5.0},60]
+			// timelapse
+			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0},45],
+			400::[{98.4788,143.3489,64.7132},{98.6933,81.909,4.0},41],
+//			400::[{89.6265,108.4783,47.5701},{89.7842,63.3143,0.0}],
+			// birdview
+			401 :: [{8.4863,59.3305,138.7569}, {15.7918,59.2922,0.0},30.0],
+			900 :: [{140.0042,58.4734,138.7569},{147.3097,58.4351,0.0},30.0],
+			// edge
+			901 :: [{3.198,119.1418,68.7856}, {94.0765,64.9665,20.0},40],
+			960 :: [{19.9273,106.9988,68.7856}, {112.8058,52.8235,0.0},40],
+			1070 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
+			// edge fix until
+			1120 :: [{35.215,98.1132,69.7071}, {110.7052,58.1287,-10.0}, 40],
+			// cafe (left to right)
+			1121 :: [{81.0254,22.4783,12}, {88.5952,42.4058,5.0}],
+			1250 :: [{81.0254,22.4783,12}, {81.0567,42.6362,5.5}],
+			// Kubrick fade out
+			1251::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
+			1450::[{98.1771,229.7714,155.74}, {98.6933,81.909,3.0}, 23, 1.3]
 		],
 		"Kubrick" :: [
 			0::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0}],
-//			100::[{98.4788,143.3489,64.7132},{98.6933,81.909,0.0},30]
-			300::[{98.3439,181.9881,105.411},{98.6933,81.909,0.0},30.0]
+//			200::[{98.3439,181.9881,105.411},{98.6933,81.909,5.0},28.0]
+			200::[{98.1771,229.7714,155.74}, {98.6933,81.909,3.0}, 23, 1.3]
+//			200::[{97.3236,474.2321,413.2247}, {98.6933,81.909,10.0},10,1.5]
 		]
 		
 	];
 	
-	list<string> dynamicCameraList <- ["Timelapse", "Bird view", "Bird view (far)", "Walk to the edge","Trailer","Kubrick"];
+	list<string> dynamicCameraList <- ["Timelapse", "Bird view", "Bird view (far)", "Walk to the edge","Trailer","Kubrick", "From cafe (left to right)"];
 	
-	string currentScenario <- "Kubrick";
+	string currentScenario <- "Trailer";
 	map<int,list> currentCameraPath <- cameraPaths[currentScenario];
+	float videoSpeed <- 1.0;
 
 //	point cameraPosition <- {98.4788,143.3489,64.7132};
 //	point cameraTarget <- {98.6933,81.909,0.0} ;
@@ -177,7 +183,7 @@ global {
 		if (cycle >= lastWaypoint){
 			cameraPosition <- currentCameraPath[lastWaypoint][0];
 			cameraTarget <- currentCameraPath[lastWaypoint][1];
-			cameraLens <- length(currentCameraPath[lastWaypoint]) = 3 ? float(currentCameraPath[lastWaypoint][2]) : 45.0;
+			cameraLens <- length(currentCameraPath[lastWaypoint]) >= 3 ? float(currentCameraPath[lastWaypoint][2]) : 45.0;
 		} else {
 			// determine the previous waypoint and the next one for the camera movement
 			int previousWaypoint <- max(currentCameraPath.keys where (each <= cycle));
@@ -188,14 +194,38 @@ global {
 			cameraTarget <- point(currentCameraPath[previousWaypoint][1]) * (nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)
 				+ point(currentCameraPath[nextWaypoint][1]) * (cycle - previousWaypoint) / (nextWaypoint - previousWaypoint);
 			// adjust the camera lens
-			float previousCameraLens <- length(currentCameraPath[previousWaypoint]) = 3 ? float(currentCameraPath[previousWaypoint][2]) : 45.0;
-			float nextCameraLens <- length(currentCameraPath[nextWaypoint]) = 3 ? float(currentCameraPath[nextWaypoint][2]) : 45.0;
-			cameraLens <- previousCameraLens * (nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)
-				+ nextCameraLens * (cycle - previousWaypoint) / (nextWaypoint - previousWaypoint);
+			float previousCameraLens <- length(currentCameraPath[previousWaypoint]) >= 3 ? float(currentCameraPath[previousWaypoint][2]) : 45.0;
+			float nextCameraLens <- length(currentCameraPath[nextWaypoint]) >= 3 ? float(currentCameraPath[nextWaypoint][2]) : 45.0;
+			
+			if (length(currentCameraPath[nextWaypoint]) = 4){
+				float pow <- float(currentCameraPath[nextWaypoint][3]);
+				cameraLens <- previousCameraLens * ((nextWaypoint - cycle) / (nextWaypoint - previousWaypoint))^pow
+				+ nextCameraLens * (1 - ((nextWaypoint - cycle) / (nextWaypoint - previousWaypoint))^pow);
+			}else{
+				cameraLens <- previousCameraLens * ((nextWaypoint - cycle) / (nextWaypoint - previousWaypoint))
+				+ nextCameraLens * (1 - ((nextWaypoint - cycle) / (nextWaypoint - previousWaypoint)));
+			}	
 		}
 	}
 	
 	init {
+		
+		// change film speed
+		if (length(currentCameraPath) > 1)
+		{
+			map<int,list> acceleratedCameraPath <- [];
+			int currentFrame <- 0;
+			acceleratedCameraPath <+ currentCameraPath.keys[0]::currentCameraPath.values[0];
+			loop i from: 1 to: length(currentCameraPath.keys)-1{
+				int initialDuration <- currentCameraPath.keys[i] - currentCameraPath.keys[0];
+				int nextFrame <- max(acceleratedCameraPath.keys[i-1]+1,int(ceil(initialDuration / videoSpeed)));
+				acceleratedCameraPath <+ nextFrame::currentCameraPath.values[i];
+			}
+			currentCameraPath <- acceleratedCameraPath;
+		}
+		
+		
+		
 		gama.pref_opengl_z_factor <- 0.0;
 		
 
@@ -880,6 +910,8 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
 			species screen transparency: 0.2;
+			
+
 		}
 	}
 	
@@ -889,7 +921,7 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel" {
 	float minimum_cycle_duration <- 0.001#s;
 	output synchronized: true {
-		display map type: 3d axes: false background: #darkgray toolbar: true{
+		display map type: 3d axes: false background: #darkgray toolbar: false{
 //			camera 'default' location: {98.4788,143.3489,64.7132} target: {98.6933,81.909,0.0};
 //			camera 'default' location: {98.4788,143.3489,64.7132}*(1-cycle/120) + {89.6265,108.4783,47.5701} *cycle/120
 //			target:  {98.6933,81.909,0.0} * (1-cycle/120) + {89.7842,63.3143,0.0} * cycle/120;
@@ -915,7 +947,7 @@ experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel"
 		}
 	}
 	
-	reflex saveSnapshots when: (cycle>10000) {
+	reflex saveSnapshots when: (cycle>1) {
 		ask simulation{
 			save (snapshot("map")) to: "snapshots/img"+cycle+".png";
 		}
