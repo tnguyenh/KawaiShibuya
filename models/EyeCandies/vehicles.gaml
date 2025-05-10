@@ -1,65 +1,48 @@
 /**
-* Name: cars
+* Name: vehicles
 *  
 * Author: Tri Nguyen-Huu, Patrick Taillandier
 * 
-* Generate car traffic using driving skill. Cars follow a simple network with intersections and traffic lights. 
+* Generate vehicles traffic using driving skill. Vehicles follow a simple network with intersections and traffic lights. 
 * 
 * Contains the following species: 
-* - car
+* - vehicles (two types: cars and trucks)
 * - road
 * - intersection
 * - traffic_signal
 */
 
 
-model cars
+model vehicles
 
 
 global{
-	float car_spawning_interval <- 5#s;
+	// parameters for vehicles behavior in the simulation
+	float vehicle_spawning_interval <- 5#s;
 	float global_max_speed <- 40 #km / #h;
 	
+
+	// traffic lights cycle schedule (based on observations) and schedule paratemers
+	list<float> schedule_times <- [ 15#s, // pedestrian light to green
+									60#s, // pedestrian light to red
+									85#s, // vehicles group 1 to green
+									100#s,// vehicles group 1 to red
+									105#s,// vehicles group 2 to green
+									120#s // vehicles group 2 to red
+								  ];	
+								  
 	int schedule_step <- 0;
 	float schedule_time <- 0.0;
 	float time_to_clear_crossing <- 0.0;
 	float percent_time_remaining <- (schedule_times[0] )/(schedule_times[5] + schedule_times[0] - schedule_times[1]);
 	float time_since_last_spawn <- 0.0;
-	
-	list<string> carModels;
-	list<string> carModelsb;
-
-	// traffic lights cycle schedule (based on observations)
-	list<float> schedule_times <- [ 15#s, // pedestrian light to green
-									60#s, // pedestrian light to red
-									85#s, // car group 1 to green
-									100#s,// car group 1 to red
-									105#s,// car group 2 to green
-									120#s // car group 2 to red
-								  ];	
-	
+								  
+								  
+	// load road network
 	shape_file road_shape_file <- shape_file("../includes/roads.shp");
 	graph road_network;	
 	
-//	map<rgb,int> palette <- [
-//		rgb(246, 229, 141)::1,
-//		rgb(249, 202, 36)::1,
-//		rgb(126, 214, 223)::1,
-//		rgb(34, 166, 179)::1,
-//		rgb(255, 190, 118)::1,
-//		rgb(240, 147, 43)::1,
-//		rgb(255, 121, 121)::1,
-//		rgb(235, 77, 75)::1,
-//		rgb(104, 109, 224)::1,
-//		rgb(72, 52, 212)::1,
-//		rgb(186, 220, 88)::1,
-//		rgb(106, 176, 76)::1,
-//		rgb(48, 51, 107)::1,
-//		rgb(19, 15, 64)::1,
-//		rgb(149, 175, 192)::1,
-//		rgb(83, 92, 104)::1
-//	];
-
+	// color palette for cars body
 	map<rgb,int> palette <- [
 		rgb(249, 202, 36)::1,
 		rgb(240, 147, 43)::1,
@@ -128,24 +111,24 @@ global{
 			final_intersection <- compute_target();
 		}
 		
-		// spawn cars at initialization
+		// spawn vehicles at initialization
 		loop times: 12{
-			do spawn_car;
+			do spawn_vehicle;
 		}
 		
 		
 	}
 	
-	// spawn one car on the edge of the map
-	action spawn_car{
+	// spawn one vehicle on the edge of the map
+	action spawn_vehicle{
 		intersection i <- one_of(intersection where (each.is_spawn_location));
-		create car with: (location: i.location, target: i.final_intersection);
+		create vehicle with: (location: i.location, target: i.final_intersection);
 	}
 	
-	// spawn cars at given time intervals
-	reflex car_scheduler{
-		if time_since_last_spawn > car_spawning_interval {
-			do spawn_car;
+	// spawn vehicles at given time intervals
+	reflex vehicle_scheduler{
+		if time_since_last_spawn > vehicle_spawning_interval {
+			do spawn_vehicle;
 			time_since_last_spawn <- 0.0;
 		}else{
 			time_since_last_spawn <- time_since_last_spawn + step;
@@ -155,6 +138,7 @@ global{
 
 /* species declarations */
 
+// species for the roads
 species road skills: [road_skill]{
 	int group;
 	int num_lanes <- 1;
@@ -165,11 +149,10 @@ species road skills: [road_skill]{
 	}
 }
 
-
-species car skills: [driving] {
-//	rgb color <- rnd_color(255);
+// species for the vehicles
+species vehicle skills: [driving] {
 	rgb color <- rnd_choice(palette);
-	rgb color2;
+	rgb color2; // secondary color for trucks
 	intersection target;
 	string type <- "car" among: ["car","truck"];
 	int version;
@@ -177,10 +160,9 @@ species car skills: [driving] {
 	obj_file carOtherParts;
 	obj_file carOtherPartsBraking;
 	
-	// randomly choose one type of car when spawned
+	// randomly choose one type of vehicle when spawned
 	init {
 		type <- rnd_choice(["car"::0.9,"truck"::0.1]);
-		version <- rnd(length(carModels)-1);
 		switch type {
 			match "car"{
 				vehicle_length <- 5 #m;
@@ -204,26 +186,19 @@ species car skills: [driving] {
 	// move along the graphe using the driving skill
 	reflex move when: final_target != nil {
 		do drive;
-		//if arrived at target, die and create a new car
+		//if arrived at target, remove the vehicle
 		if (final_target = nil) {
 			do unregister;
 			do die;
 		}
 	}
 	
-	// cars 3d models (car and truck)
+	// vehicles 3d models (cars and truck)
 	aspect kawai {
 		if (current_road != nil) {
 			switch type{
-				match "car"{
-//					if acceleration > 0{
-//						draw obj_file(carModels[version])  at: location+{0,0,0.7} size: 1.5  
-//						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
-//					}else{
-//						draw obj_file(carModelsb[version])  at: location+{0,0,0.7} size: 1.5   
-//						rotate: rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) ;	
-//					}	
-					if acceleration > 0{	
+				match "car"{	
+					if acceleration > 0 {	
 						draw carOtherParts  at: location+{0,0,0.93} size: 2  rotate: pair<float,point>(rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) );	
 					}else{
 						draw carOtherPartsBraking  at: location+{0,0,0.93} size: 2  rotate: pair<float,point>(rotation_composition(-90::{1,0,0},heading+90::{0,0,1}) );						
@@ -333,7 +308,7 @@ species intersection skills: [intersection_skill] {
 		}
 	}
 	
-	// turn the car light to green
+	// turn the traffic light to green for vehicles
 	action to_green {
 		stop[0] <- [];
 		is_green <- true;
@@ -341,12 +316,12 @@ species intersection skills: [intersection_skill] {
 		current_color <- "green";
 	}
 	
-	// turn the car light to orange
+	// turn the traffic light to orange for vehicles
 	action to_orange{
 		current_color <- "orange";
 	}
 
-	// turn the car light to red
+	// turn the traffic light to red for vehicles
 	action to_red {
 		stop[0] <- ways;
 		is_green <- false;
@@ -356,7 +331,7 @@ species intersection skills: [intersection_skill] {
 }
 
 
-// 3d model of the traffic signal, with lights for cars and pedestrians
+// 3d model of the traffic signal, with lights for vehicles and pedestrians
 species traffic_signal{
 	int group;
 	int crosswalk_left;

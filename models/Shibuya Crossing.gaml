@@ -17,11 +17,11 @@ model KawaiShibuyaCrossing
 
 import "EyeCandies/trains.gaml"
 import "EyeCandies/props.gaml"
-import "EyeCandies/cars.gaml"
+import "EyeCandies/vehicles.gaml"
 
 global {
 	
-	int nb_people <- 2200;
+	int nb_people <- 20;
 	float step <- 0.25#s;
 	bool parallelize <- true;
 	
@@ -152,20 +152,7 @@ global {
 	bool can_cross <- false;
 //	float time_since_last_spawn <- 0.0;
 	
-	people the_people;
-	//point endpoint;
-//	int schedule_step <- 0;
-//	float schedule_time <- 0.0;
-//	float time_to_clear_crossing <- 0.0;
-//	float percent_time_remaining <- (schedule_times[0] )/(schedule_times[5] + schedule_times[0] - schedule_times[1]);
-//
-//		list<float> schedule_times <- [ 15#s, // pedestrian light to green
-//									60#s, // pedestrian light to red
-//									85#s, // car group 1 to green
-//									100#s,// car group 1 to red
-//									105#s,// car group 2 to green
-//									120#s // car group 2 to red
-//								  ];	
+	people the_people;	
 	
 	geometry open_area;
 
@@ -324,7 +311,7 @@ global {
 		//	do add_people;
 		}	
 	
-	//	create debug;
+
 
 
 		create traffic_signal from: traffic_signals_shape_file with:[group::int(get("group")),crosswalk_left::int(get("cw_l")),
@@ -409,8 +396,8 @@ global {
 	
 	reflex main_scheduler{
 
-	
 		// change traffic lights
+		
 		
 		if schedule_step = 1{
 			percent_time_remaining <- (schedule_times[1] - schedule_time)/(schedule_times[1] - schedule_times[0]);
@@ -888,7 +875,7 @@ experiment "Parameter panel" virtual: true{
 	parameter "P relaxion_SFM_simple"  var: P_relaxion_SFM_simple category: "SFM simple" ;
 	parameter "P A_pedestrian_SFM_simple"  var: P_A_pedestrian_SFM_simple category: "SFM simple" ;
 	
-	parameter "car spawning interval" var: car_spawning_interval category: "Simulation";
+	parameter "Vehicle spawning interval" var: vehicle_spawning_interval category: "Simulation";
 }
 
 
@@ -905,7 +892,7 @@ experiment "Shibuya Crossing" type: gui parent: "Parameter panel" {
 			species carriage;// transparency: 0.3;
 			species fake_building transparency: 0.9;			
 			species people aspect: 3d;
-			species car aspect: kawai;// transparency: 0.3;
+			species vehicle aspect: kawai;// transparency: 0.3;
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
@@ -939,7 +926,7 @@ experiment "Shibuya Crossing with snapshots" type: gui parent: "Parameter panel"
 			species carriage;// transparency: 0.3;
 			species fake_building transparency: 0.9;			
 			species people aspect: 3d;
-			species car aspect: kawai;// transparency: 0.3;
+			species vehicle aspect: kawai;// transparency: 0.3;
 			species traffic_signal;
 			species building transparency: 0.3;
 			species tree transparency: 0.3;
@@ -968,7 +955,7 @@ experiment "First person view" type: gui  {
 		 	species people aspect: 3d;
 		 	species tree transparency: 0.6;
 			species building transparency: 0.4;
-			species car transparency: 0.6;
+			species vehicle transparency: 0.6;
 			species screen transparency: 0.3;
 		}
 	}
@@ -978,8 +965,8 @@ experiment "Car view" type: gui  {
 	float minimum_cycle_duration <- 0.001#s;
 	output {
 		display map type: 3d axes: false background: #darkgray{
-			camera #default dynamic: true location: {int(first(car).location.x), int(first(car).location.y), 0.8#m} target:
-			{cos(first(car).heading) + int(first(car).location.x), sin(first(car).heading)  + int(first(car).location.y), 0.8#m};
+			camera #default dynamic: true location: {int(first(vehicle).location.x), int(first(vehicle).location.y), 0.8#m} target:
+			{cos(first(vehicle).heading) + int(first(vehicle).location.x), sin(first(vehicle).heading)  + int(first(vehicle).location.y), 0.8#m};
 			species train;
 			species fake_building transparency: 0.9;			
 			image photo refresh: false transparency: 0 ;	
@@ -987,7 +974,7 @@ experiment "Car view" type: gui  {
 		 	species people aspect: 3d;
 			species tree transparency: 0.6;
 			species building transparency: 0.4;
-			species car transparency: 0.6;
+			species vehicle transparency: 0.6;
 			species screen transparency: 0.3;
 		}
 	}
